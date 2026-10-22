@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #F4F7FB;
+  --bg-panel: rgba(255, 255, 255, 0.88);
+  --bg-arena: #0B192C;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+  --border-color: #CBD5E1;
+  --accent-primary: #0284C7;
+  --accent-secondary: #2563EB;
+  --team-1: #00F5D4;
+  --team-1-ui: #00A896;
+  --team-2: #FF2A85;
+  --team-2-ui: #E11D48;
+  --status-passed: #10B981;
+  --status-running: #F59E0B;
+  --status-error: #EF4444;
+
+  --card-clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  --card-radius: 0px;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Technical dot-matrix background pattern */
+.dot-matrix-bg {
+  background-image: radial-gradient(rgba(2, 132, 199, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Aerospace Technical Chamfer Card */
+.chamfer-card {
+  clip-path: var(--card-clip-path);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(12px);
+  position: relative;
+}
+
+/* Corner Reticle Marks (+) */
+.reticle-tl::before {
+  content: "+";
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.reticle-tr::after {
+  content: "+";
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-family: monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Keyframe animations for light pulses & radar sweeps */
+@keyframes beamMove {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-beam {
+  animation: beamMove 2.5s infinite linear;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.animate-glow {
+  animation: pulseGlow 2s infinite ease-in-out;
+}

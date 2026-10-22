@@ -29,8 +29,8 @@ USER battlecode:battlecode
 # Copy fat jar from builder
 COPY --from=builder --chown=battlecode:battlecode /workspace/backend/target/battlecode-backend-*-exec.jar /app/app.jar
 
-# Render Free 512MB RAM Guardrails (Section 3 Invariant 1)
-ENV JAVA_OPTS="-Xms64m -Xmx160m -XX:+UseSerialGC -XX:MaxMetaspaceSize=48m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
+# Render Free 512MB RAM Guardrails (Max 160MB Heap + 128MB Metaspace < 512MB RAM)
+ENV JAVA_OPTS="-Xms64m -Xmx160m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 ENV PORT=8080
 EXPOSE 8080
 

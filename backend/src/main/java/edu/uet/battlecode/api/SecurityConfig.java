@@ -49,7 +49,11 @@ public class SecurityConfig {
     @Bean CorsConfigurationSource corsConfigurationSource(
             @Value("${battlecode.frontend-origin:}") String origin) {
         CorsConfiguration cors = new CorsConfiguration();
-        if (!origin.isBlank()) cors.setAllowedOrigins(List.of(origin));
+        if (!origin.isBlank() && !"*".equals(origin)) {
+            cors.setAllowedOrigins(List.of(origin));
+        } else {
+            cors.addAllowedOriginPattern("*");
+        }
         cors.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
         cors.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

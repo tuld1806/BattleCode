@@ -39,3 +39,13 @@ services:
         sync: false
       - key: R2_PUBLIC_BASE_URL
         sync: false
+
+  - type: static
+    name: battlecode-frontend
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/out
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: https://battlecode-api.onrender.com
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://dceartkumxtkovglhfnj.supabase.co

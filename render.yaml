@@ -3,6 +3,7 @@ services:
     name: battlecode-api
     runtime: docker
     dockerfilePath: backend/Dockerfile
+    dockerContext: .
     plan: free
     region: singapore
     envVars:

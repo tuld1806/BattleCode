@@ -27,14 +27,14 @@ RUN addgroup -S battlecode && adduser -S battlecode -G battlecode
 USER battlecode:battlecode
 
 # Copy fat jar from builder
-COPY --from=builder --chown=battlecode:battlecode /workspace/backend/target/battlecode-backend-*.jar /app/app.jar
+COPY --from=builder --chown=battlecode:battlecode /workspace/backend/target/battlecode-backend-*-exec.jar /app/app.jar
 
 # Render Free 512MB RAM Guardrails (Section 3 Invariant 1)
 ENV JAVA_OPTS="-Xms64m -Xmx160m -XX:+UseSerialGC -XX:MaxMetaspaceSize=48m -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom"
 ENV PORT=8080
 EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:${PORT}/api/public/tournaments || exit 1
 
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

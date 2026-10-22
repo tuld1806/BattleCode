@@ -1,0 +1,14 @@
+.git
+.gitignore
+.agent
+frontend
+.next
+node_modules
+target
+**/target
+**/*.class
+**/*.jar
+.m2
+.vscode
+.idea
+*.log

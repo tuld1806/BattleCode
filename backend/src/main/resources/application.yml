@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 0
+  flyway:
+    enabled: true
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+battlecode:
+  jwt-issuer: ${SUPABASE_JWT_ISSUER}
+  jwks-uri: ${SUPABASE_JWKS_URI}
+  worker-key: ${WORKER_API_KEY}
+  frontend-origin: ${FRONTEND_ORIGIN:}
+  github-dispatch-repo: ${GITHUB_DISPATCH_REPO}
+  github-dispatch-token: ${GITHUB_DISPATCH_TOKEN}
+  github-dispatch-ref: ${GITHUB_DISPATCH_REF:main}
+  r2-endpoint: ${R2_ENDPOINT}
+  r2-access-key: ${R2_ACCESS_KEY_ID}
+  r2-secret-key: ${R2_SECRET_ACCESS_KEY}
+  r2-bucket: ${R2_BUCKET}
+  r2-public-base: ${R2_PUBLIC_BASE_URL}

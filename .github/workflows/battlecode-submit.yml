@@ -1,0 +1,108 @@
+name: Validate BattleCode submission
+on:
+  workflow_dispatch:
+    inputs:
+      submission_id:
+        required: true
+        type: string
+      repo_url:
+        required: true
+        type: string
+      commit_sha:
+        required: true
+        type: string
+      language:
+        required: true
+        type: choice
+        options: [python, cpp, java]
+      callback_token:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Checkout pinned public source
+        env:
+          REPO_URL: ${{ inputs.repo_url }}
+          COMMIT_SHA: ${{ inputs.commit_sha }}
+          LANGUAGE: ${{ inputs.language }}
+        run: |
+          set -euo pipefail
+          [[ "$REPO_URL" =~ ^https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/?$ ]]
+          [[ "$COMMIT_SHA" =~ ^[0-9a-f]{40}$ ]]
+          mkdir student artifact
+          git -C student init -q
+          git -C student remote add origin "$REPO_URL"
+          git -C student fetch -q --depth=1 origin "$COMMIT_SHA"
+          git -C student checkout -q --detach FETCH_HEAD
+          test "$(git -C student rev-parse HEAD)" = "$COMMIT_SHA"
+          python3 scripts/validate_submission.py student "$LANGUAGE"
+      - name: Build isolated CI image
+        run: docker build -q -t battlecode-ci -f scripts/ci/Dockerfile scripts/ci
+      - name: Compile student entry in container
+        env:
+          LANGUAGE: ${{ inputs.language }}
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --memory 512m --pids-limit 64 --tmpfs /tmp:rw,nosuid,size=64m \
+            -v "$PWD/student:/src:ro" -v "$PWD/artifact:/out:rw" -e LANGUAGE \
+            battlecode-ci /bin/sh -c '
+              set -eu
+              case "$LANGUAGE" in
+                python) PYTHONPYCACHEPREFIX=/tmp/pycache timeout 15s python3 -m py_compile /src/bot.py; cp /src/bot.py /out/bot.py ;;
+                cpp) timeout 15s g++ -O3 -std=c++20 /src/src/main.cpp -o /out/bot ;;
+                java) timeout 15s javac --release 21 -encoding UTF-8 -d /out /src/src/main/java/Bot.java ;;
+              esac'
+      - name: Ten-turn smoke against DummyBot
+        env:
+          LANGUAGE: ${{ inputs.language }}
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --memory 256m --pids-limit 32 --tmpfs /tmp:rw,nosuid,size=8m \
+            -v "$PWD/artifact:/bot:ro" -v "$PWD/scripts:/test:ro" \
+            battlecode-ci python3 /test/smoke_test.py "$LANGUAGE"
+      - name: Package artifact and request upload URL
+        id: package
+        env:
+          API_BASE: ${{ vars.BATTLECODE_API_BASE }}
+          CALLBACK_TOKEN: ${{ inputs.callback_token }}
+          SUBMISSION_ID: ${{ inputs.submission_id }}
+        run: |
+          set -euo pipefail
+          tar -czf bot.tar.gz -C artifact .
+          DIGEST=$(sha256sum bot.tar.gz | cut -d' ' -f1)
+          echo "sha256=$DIGEST" >> "$GITHUB_OUTPUT"
+          BODY=$(jq -nc --arg id "$SUBMISSION_ID" --arg sha "$DIGEST" \
+            '{submission_id:$id,sha256:$sha}')
+          URL=$(curl -fsS -X POST "$API_BASE/api/webhooks/ci-upload-url" \
+            -H "X-CI-Token: $CALLBACK_TOKEN" -H 'Content-Type: application/json' \
+            --data "$BODY" | jq -r .put_url)
+          CHECKSUM=$(printf '%s' "$DIGEST" | xxd -r -p | base64 -w0)
+          curl -fsS -X PUT "$URL" -H 'Content-Type: application/gzip' \
+            -H "x-amz-checksum-sha256: $CHECKSUM" --data-binary @bot.tar.gz
+      - name: Report result to platform
+        if: always()
+        env:
+          API_BASE: ${{ vars.BATTLECODE_API_BASE }}
+          CALLBACK_TOKEN: ${{ inputs.callback_token }}
+          SUBMISSION_ID: ${{ inputs.submission_id }}
+          DIGEST: ${{ steps.package.outputs.sha256 }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set -euo pipefail
+          if [ "$JOB_STATUS" = success ]; then PASSED=true; else PASSED=false; fi
+          BODY=$(jq -nc --arg id "$SUBMISSION_ID" --arg sha "$DIGEST" \
+            --argjson passed "$PASSED" \
+            '{submission_id:$id,passed:$passed,sha256:$sha}')
+          curl -fsS -X POST "$API_BASE/api/webhooks/ci-result" \
+            -H "X-CI-Token: $CALLBACK_TOKEN" -H 'Content-Type: application/json' \
+            --data "$BODY"

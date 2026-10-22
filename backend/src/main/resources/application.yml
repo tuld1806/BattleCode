@@ -15,8 +15,8 @@ battlecode:
   jwks-uri: ${SUPABASE_JWKS_URI}
   worker-key: ${WORKER_API_KEY}
   frontend-origin: ${FRONTEND_ORIGIN:}
-  github-dispatch-repo: ${GITHUB_DISPATCH_REPO}
-  github-dispatch-token: ${GITHUB_DISPATCH_TOKEN}
+  github-dispatch-repo: ${GITHUB_DISPATCH_REPO:tuld1806/BattleCode}
+  github-dispatch-token: ${GITHUB_DISPATCH_TOKEN:placeholder_token}
   github-dispatch-ref: ${GITHUB_DISPATCH_REF:main}
   r2-endpoint: ${R2_ENDPOINT}
   r2-access-key: ${R2_ACCESS_KEY_ID}

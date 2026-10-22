@@ -42,3 +42,28 @@ All code produced across all Phases must adhere to 100% of these invariants:
     - `<LiveTelemetryTicker>` (live system pulse ribbon, status LEDs, and real-time tournament event marquee).  
     *Strict Prohibition:* AI Agents are strictly forbidden from generating generic, boring AI template layouts (plain `rounded-xl shadow-md bg-white text-gray-800` cards with static text). The interface must feel like a living Aerospace AI Research Lab / Tactical Esports Cockpit (Kinetic Bright Aerospace Lab) that wows computer science students. All colors and chamfer geometries must inherit from CSS variables governed by `docs/ui_theme_manifest.md`.
 11. **Canvas Performance & 60fps Guardrails:** `ReplayCanvas` must bind `useRef<HTMLCanvasElement>` and run a `requestAnimationFrame` loop reading from `playbackRef` synchronized with Zustand, **never invoking `useState` on a per-frame basis**. Rendering must adhere to the `createRenderer(canvas): ReplayRenderer` contract with smooth shockwaves, radar sweeps, and particle systems with zero lag.
+12. **Continuous Context Generation & Zero Full-Codebase-Reread Invariant:** Agents are strictly prohibited from ingesting or scanning the full repository on new sessions. Instead, agents must bootstrap strictly by reading `.agent/00_CONSTITUTION.md`, `.agent/01_PROJECT_STATE.md`, `.agent/02_PHASE_ROADMAP.md`, and the latest ledger in `.agent/handoffs/` (< 2,500 tokens). Every agent session must update project state and emit a standardized handoff ledger before yielding context.
+
+---
+
+## 4. THE AUTONOMOUS EXECUTION & SELF-DOCUMENTING LOOP
+Every development phase must execute in a continuous, closed 4-stage lifecycle governed by `.agent/03_HANDOFF_PROTOCOL.md`:
+
+```
+ [BOOT: Ingest 4 Control Files (<2,500 tokens)]
+                    │
+                    ▼
+ [EXECUTE: Continuous TDD Tasks from 02_PHASE_ROADMAP.md]
+                    │
+                    ▼
+ [VERIFY: Real Terminal Command Gate (mvn test / npm run build)]
+                    │
+                    ▼
+ [HANDOFF: Update 01_PROJECT_STATE.md + Emit handoff ledger]
+```
+
+1. **Boot Stage:** Fast-boot in <2,500 tokens without scanning directories or re-reading unaffected files.
+2. **Execution Stage:** Drive all tasks linearly with Red-Green-Refactor test loops without pausing for trivial permissions.
+3. **Verification Stage:** Enforce evidence before assertions. Run terminal build/test commands and verify exit code 0.
+4. **Handoff Stage:** Update `.agent/01_PROJECT_STATE.md`, write `.agent/handoffs/phase-[N]-handoff.md`, and cleanly commit changes to Git.
+
